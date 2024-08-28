@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.maplestory.onecard.mapper.CardInfoMapper">
+<mapper namespace="com.maplestory.onecard.model.mapper.CardInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.maplestory.onecard.domain.CardInfo">
+    <resultMap id="BaseResultMap" type="com.maplestory.onecard.model.domain.CardInfo">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="color" column="color" jdbcType="VARCHAR"/>
         <result property="point" column="point" jdbcType="VARCHAR"/>
@@ -25,7 +25,7 @@
         from card_info
         where id = #{id,jdbcType=BIGINT}
     </select>
-    <select id="selectAvailable" resultType="com.maplestory.onecard.domain.CardInfo">
+    <select id="selectAvailable" resultType="com.maplestory.onecard.model.domain.CardInfo">
         select
         <include refid="Base_Column_List"/>
         from card_info
@@ -37,7 +37,7 @@
         from card_info
         where id = #{id,jdbcType=BIGINT}
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.domain.CardInfo"
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.CardInfo"
             useGeneratedKeys="true">
         insert into card_info
         ( id, color, point
@@ -45,7 +45,7 @@
         values ( #{id,jdbcType=BIGINT}, #{color,jdbcType=VARCHAR}, #{point,jdbcType=VARCHAR}
                , #{desc,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR}, #{available,jdbcType=TINYINT})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.domain.CardInfo"
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.CardInfo"
             useGeneratedKeys="true">
         insert into card_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -65,7 +65,7 @@
             <if test="available != null">#{available,jdbcType=TINYINT},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.domain.CardInfo">
+    <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.model.domain.CardInfo">
         update card_info
         <set>
             <if test="color != null">
@@ -86,7 +86,7 @@
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.maplestory.onecard.domain.CardInfo">
+    <update id="updateByPrimaryKey" parameterType="com.maplestory.onecard.model.domain.CardInfo">
         update card_info
         set color     = #{color,jdbcType=VARCHAR},
             point     = #{point,jdbcType=VARCHAR},

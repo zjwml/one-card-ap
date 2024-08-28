@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.maplestory.onecard.mapper.UserInfoMapper">
+<mapper namespace="com.maplestory.onecard.model.mapper.UserInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.maplestory.onecard.domain.UserInfo">
+    <resultMap id="BaseResultMap" type="com.maplestory.onecard.model.domain.UserInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userName" column="user_name" jdbcType="VARCHAR"/>
             <result property="userId" column="user_id" jdbcType="VARCHAR"/>
@@ -22,25 +22,25 @@
         from user_info
         where  id = #{id,jdbcType=BIGINT} 
     </select>
-    <select id="selectByUserId" resultType="com.maplestory.onecard.domain.UserInfo">
+    <select id="selectByUserName" resultType="com.maplestory.onecard.model.domain.UserInfo">
         select
         <include refid="Base_Column_List" />
         from user_info
-        where  user_id = #{userId,jdbcType=BIGINT}
+        where  user_name = #{userName,jdbcType=BIGINT}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from user_info
         where  id = #{id,jdbcType=BIGINT} 
     </delete>
-    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.domain.UserInfo" useGeneratedKeys="true">
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.UserInfo" useGeneratedKeys="true">
         insert into user_info
         ( id,user_name,user_id
         ,status)
         values (#{id,jdbcType=BIGINT},#{userName,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR}
         ,#{status,jdbcType=VARCHAR})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.domain.UserInfo" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.UserInfo" useGeneratedKeys="true">
         insert into user_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
                 <if test="id != null">id,</if>
@@ -55,7 +55,7 @@
                 <if test="status != null">#{status,jdbcType=VARCHAR},</if>
         </trim>
     </insert>
-    <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.domain.UserInfo">
+    <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.model.domain.UserInfo">
         update user_info
         <set>
                 <if test="userName != null">
@@ -70,7 +70,7 @@
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
-    <update id="updateByPrimaryKey" parameterType="com.maplestory.onecard.domain.UserInfo">
+    <update id="updateByPrimaryKey" parameterType="com.maplestory.onecard.model.domain.UserInfo">
         update user_info
         set 
             user_name =  #{userName,jdbcType=VARCHAR},
