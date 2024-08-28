@@ -32,24 +32,6 @@ public class UserLoginImpl implements UserLogin {
     public ResponseJson<UserLoginOutVo> doService(UserLoginInVo inVo) {
         log.info("{}----------交易开始--------", log001);
 
-        List<BattleInfo> battleInfoList = new ArrayList<>();
-        try {
-            log.info("{}--------开始查询是否存在这个房间-----", log001);
-            battleInfoList = battleInfoMapper.selectByRoomNumber(inVo.getRoomNumber());
-            log.info("{}--------结束查询是否存在这个房间-----", log001);
-        } catch (Exception e) {
-            log.error("{}--------查询失败:{}-----", log001, e);
-            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "查询用户失败" + e.getMessage());
-        }
-        if (battleInfoList.size() > 1) {
-            log.info("{}--------房间{}不唯一！-----", log001, inVo.getRoomNumber());
-            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间冲突！请联系管理员");
-        }
-        if (battleInfoList.size() == 1 && null != battleInfoList.get(0).getPlayer4()) {
-            log.info("{}--------房间已满-----", log001);
-            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
-        }
-
         UserInfo userInfo = new UserInfo();
         try {
             log.info("{}--------开始查询是否存在这个用户-----", log001);
@@ -71,10 +53,21 @@ public class UserLoginImpl implements UserLogin {
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "查询用户失败");
             }
         }
+
+        List<BattleInfo> battleInfoList = new ArrayList<>();
+        try {
+            log.info("{}--------开始查询是否存在这个房间-----", log001);
+            battleInfoList = battleInfoMapper.selectByRoomNumber(inVo.getRoomNumber());
+            log.info("{}--------结束查询是否存在这个房间-----", log001);
+        } catch (Exception e) {
+            log.error("{}--------查询失败:{}-----", log001, e);
+            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "查询用户失败" + e.getMessage());
+        }
         //开始插入房间
+        BattleInfo battleInfo = new BattleInfo();
         if (battleInfoList.size() == 0) {
             //如果是新房间，则是房主
-            BattleInfo battleInfo = new BattleInfo();
+            battleInfo = new BattleInfo();
             battleInfo.setPlayer1(userInfo.getId());
             battleInfo.setRoomNumber(inVo.getRoomNumber());
             try {
@@ -85,10 +78,17 @@ public class UserLoginImpl implements UserLogin {
                 log.error("{}--------新增失败:{}-----", log001, e);
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "新增房间失败" + e.getMessage());
             }
-        } else {
-            BattleInfo battleInfo = battleInfoList.get(0);
+        } else if (battleInfoList.size() == 1) {
+            battleInfo = battleInfoList.get(0);
+            //如果是新进来的
+            int pos = getPosition(battleInfo);
+
+            if (0 == pos) {
+                log.info("{}--------房间已满-----", log001);
+                return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
+            }
             // 看看插入谁
-            if (null == battleInfo.getPlayer2()) {
+            if (2 == battleInfo.getPlayer2()) {
                 battleInfo.setPlayer2(userInfo.getId());
             } else if (null == battleInfo.getPlayer3()) {
                 battleInfo.setPlayer3(userInfo.getId());
@@ -104,8 +104,32 @@ public class UserLoginImpl implements UserLogin {
                 log.error("{}--------更新失败:{}-----", log001, e);
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "更新房间失败" + e.getMessage());
             }
+        } else {
+            log.error("{}--------房间{}不唯一！-----", log001, inVo.getRoomNumber());
+            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间冲突！请联系管理员");
         }
 
-        return ResponseJson.ok();
+        UserLoginOutVo outVo = new UserLoginOutVo();
+        outVo.setBattleInfo(battleInfo);
+        return ResponseJson.ok(outVo);
+    }
+
+    /**
+     * 判断可插位置
+     *
+     * @param battleInfo 战斗信息
+     * @return 是否
+     */
+    private int getPosition(BattleInfo battleInfo) {
+        if (null == battleInfo.getPlayer2()) {
+            return 2;
+        }
+        if (null == battleInfo.getPlayer3()) {
+            return 3;
+        }
+        if (null == battleInfo.getPlayer4()) {
+            return 4;
+        }
+        return 0;
     }
 }
