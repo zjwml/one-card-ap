@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestControllerAdvice(annotations = RestController.class)
@@ -42,6 +43,18 @@ public class GlobalExceptionHandler {
     public ResponseJson<Object> customExceptionHandler(NullPointerException e) {
         log.error("NullPointerException异常：", e);
         return ResponseJson.error("空指针异常");
+    }
+
+    /**
+     * 处理数据库异常
+     *
+     * @param e 错误
+     * @return 通用返回
+     */
+    @ExceptionHandler({SQLException.class})
+    public ResponseJson<Object> customExceptionHandler(SQLException e) {
+        log.error("数据库异常：", e);
+        return ResponseJson.error("数据库异常");
     }
 
     /**

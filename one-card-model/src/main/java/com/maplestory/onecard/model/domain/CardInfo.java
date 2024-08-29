@@ -33,7 +33,7 @@ public class CardInfo implements Serializable {
     /**
      * 描述
      */
-    private String desc;
+    private String description;
 
     /**
      * 图片路径
@@ -44,6 +44,11 @@ public class CardInfo implements Serializable {
      * 1-可进牌堆，0-不可进
      */
     private Integer available;
+
+    /**
+     * 0-数字牌，1-功能牌，2-变色伊莉娜，3-卡背
+     */
+    private Integer cardType;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

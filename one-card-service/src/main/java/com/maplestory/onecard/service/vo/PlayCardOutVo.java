@@ -1,23 +1,19 @@
-package com.maplestory.onecard.model.domain;
+package com.maplestory.onecard.service.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import lombok.Data;
 
-/**
- * 对战信息
- * @TableName battle_info
- */
-@TableName(value ="battle_info")
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
-public class BattleInfo implements Serializable {
+public class PlayCardOutVo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     /**
      * id
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -109,7 +105,4 @@ public class BattleInfo implements Serializable {
      * 状态
      */
     private String status;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

@@ -8,8 +8,8 @@ import java.util.List;
 /**
 * @author wing
 * @description 针对表【card_info(卡牌信息)】的数据库操作Mapper
-* @createDate 2024-08-23 16:28:06
-* @Entity com.maplestory.onecard.domain.CardInfo
+* @createDate 2024-08-29 16:07:47
+* @Entity com.maplestory.onecard.model.domain.CardInfo
 */
 @Mapper
 public interface CardInfoMapper {
@@ -27,5 +27,4 @@ public interface CardInfoMapper {
     int updateByPrimaryKey(CardInfo record);
 
     List<CardInfo> selectAvailable();
-
 }

@@ -2,6 +2,7 @@ package com.maplestory.onecard.service.service.Impl;
 
 import com.maplestory.onecard.model.domain.BattleInfo;
 import com.maplestory.onecard.model.mapper.BattleInfoMapper;
+import com.maplestory.onecard.service.util.BeanUtils;
 import com.maplestory.onecard.service.vo.UserLoginInVo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.model.domain.UserInfo;
@@ -10,12 +11,12 @@ import com.maplestory.onecard.service.service.UserLogin;
 import com.maplestory.onecard.service.vo.ResponseJson;
 import com.maplestory.onecard.service.vo.UserLoginOutVo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -35,7 +36,7 @@ public class UserLoginImpl implements UserLogin {
         UserInfo userInfo = new UserInfo();
         try {
             log.info("{}--------开始查询是否存在这个用户-----", log001);
-            userInfo = userInfoMapper.selectByUserName(inVo.getUserId());
+            userInfo = userInfoMapper.selectByUserName(inVo.getUserName());
             log.info("{}--------结束查询是否存在这个用户-----", log001);
         } catch (Exception e) {
             log.error("{}--------查询失败:{}-----", log001, e);
@@ -80,19 +81,26 @@ public class UserLoginImpl implements UserLogin {
             }
         } else if (battleInfoList.size() == 1) {
             battleInfo = battleInfoList.get(0);
-            //如果是新进来的
-            int pos = getPosition(battleInfo);
+            //判断情况
+            int pos = getPosition(battleInfo, userInfo);
 
-            if (0 == pos) {
+            if (5 == pos) {
                 log.info("{}--------房间已满-----", log001);
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
             }
+            if (0 == pos) {
+                log.info("{}--------已在桌上-----", log001);
+                UserLoginOutVo outVo = new UserLoginOutVo();
+                outVo.setBattleInfo(BeanUtils.switchNullToEmpty(battleInfo));
+                return ResponseJson.ok(outVo);
+            }
+
             // 看看插入谁
-            if (2 == battleInfo.getPlayer2()) {
+            if (2 == pos) {
                 battleInfo.setPlayer2(userInfo.getId());
-            } else if (null == battleInfo.getPlayer3()) {
+            } else if (3 == pos) {
                 battleInfo.setPlayer3(userInfo.getId());
-            } else {
+            } else if (4 == pos) {
                 battleInfo.setPlayer4(userInfo.getId());
             }
 
@@ -110,7 +118,7 @@ public class UserLoginImpl implements UserLogin {
         }
 
         UserLoginOutVo outVo = new UserLoginOutVo();
-        outVo.setBattleInfo(battleInfo);
+        outVo.setBattleInfo(BeanUtils.switchNullToEmpty(battleInfo));
         return ResponseJson.ok(outVo);
     }
 
@@ -118,18 +126,31 @@ public class UserLoginImpl implements UserLogin {
      * 判断可插位置
      *
      * @param battleInfo 战斗信息
-     * @return 是否
+     * @return 0-已入座，5-已满，其他是可以插入的位置
      */
-    private int getPosition(BattleInfo battleInfo) {
+    private int getPosition(BattleInfo battleInfo, UserInfo userInfo) {
+        if (Objects.equals(battleInfo.getPlayer1(), userInfo.getId())) {
+            return 0;
+        }
+
         if (null == battleInfo.getPlayer2()) {
             return 2;
+        } else if (Objects.equals(userInfo.getId(), battleInfo.getPlayer2())) {
+            return 0;
         }
+
         if (null == battleInfo.getPlayer3()) {
             return 3;
+        } else if (Objects.equals(userInfo.getId(), battleInfo.getPlayer3())) {
+            return 0;
         }
+
         if (null == battleInfo.getPlayer4()) {
             return 4;
+        } else if (Objects.equals(userInfo.getId(), battleInfo.getPlayer4())) {
+            return 0;
         }
-        return 0;
+
+        return 5;
     }
 }

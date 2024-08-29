@@ -16,12 +16,12 @@
         <result property="hand3" column="hand3" jdbcType="VARCHAR"/>
         <result property="hand4" column="hand4" jdbcType="VARCHAR"/>
         <result property="attackLevel" column="attack_level" jdbcType="TINYINT"/>
-        <result property="cardPrevious" column="card_previous" jdbcType="BIGINT"/>
+        <result property="cardPrevious" column="card_previous" jdbcType="VARCHAR"/>
         <result property="direction" column="direction" jdbcType="TINYINT"/>
         <result property="deck" column="deck" jdbcType="VARCHAR"/>
         <result property="playPlayer" column="play_player" jdbcType="BIGINT"/>
         <result property="nextPlayer" column="next_player" jdbcType="BIGINT"/>
-        <result property="cardPlay" column="card_play" jdbcType="BIGINT"/>
+        <result property="cardPlay" column="card_play" jdbcType="VARCHAR"/>
         <result property="roomNumber" column="room_number" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="VARCHAR"/>
     </resultMap>
@@ -68,9 +68,9 @@
         values ( #{id,jdbcType=BIGINT}, #{turn,jdbcType=BIGINT}, #{player1,jdbcType=BIGINT}
                , #{player2,jdbcType=BIGINT}, #{player3,jdbcType=BIGINT}, #{player4,jdbcType=BIGINT}
                , #{hand1,jdbcType=VARCHAR}, #{hand2,jdbcType=VARCHAR}, #{hand3,jdbcType=VARCHAR}
-               , #{hand4,jdbcType=VARCHAR}, #{attackLevel,jdbcType=TINYINT}, #{cardPrevious,jdbcType=BIGINT}
+               , #{hand4,jdbcType=VARCHAR}, #{attackLevel,jdbcType=TINYINT}, #{cardPrevious,jdbcType=VARCHAR}
                , #{direction,jdbcType=TINYINT}, #{deck,jdbcType=VARCHAR}, #{playPlayer,jdbcType=BIGINT}
-               , #{nextPlayer,jdbcType=BIGINT}, #{cardPlay,jdbcType=BIGINT}, #{roomNumber,jdbcType=VARCHAR}
+               , #{nextPlayer,jdbcType=BIGINT}, #{cardPlay,jdbcType=VARCHAR}, #{roomNumber,jdbcType=VARCHAR}
                , #{status,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id"
@@ -109,12 +109,12 @@
             <if test="hand3 != null">#{hand3,jdbcType=VARCHAR},</if>
             <if test="hand4 != null">#{hand4,jdbcType=VARCHAR},</if>
             <if test="attackLevel != null">#{attackLevel,jdbcType=TINYINT},</if>
-            <if test="cardPrevious != null">#{cardPrevious,jdbcType=BIGINT},</if>
+            <if test="cardPrevious != null">#{cardPrevious,jdbcType=VARCHAR},</if>
             <if test="direction != null">#{direction,jdbcType=TINYINT},</if>
             <if test="deck != null">#{deck,jdbcType=VARCHAR},</if>
             <if test="playPlayer != null">#{playPlayer,jdbcType=BIGINT},</if>
             <if test="nextPlayer != null">#{nextPlayer,jdbcType=BIGINT},</if>
-            <if test="cardPlay != null">#{cardPlay,jdbcType=BIGINT},</if>
+            <if test="cardPlay != null">#{cardPlay,jdbcType=VARCHAR},</if>
             <if test="roomNumber != null">#{roomNumber,jdbcType=VARCHAR},</if>
             <if test="status != null">#{status,jdbcType=VARCHAR},</if>
         </trim>
@@ -153,7 +153,7 @@
                 attack_level = #{attackLevel,jdbcType=TINYINT},
             </if>
             <if test="cardPrevious != null">
-                card_previous = #{cardPrevious,jdbcType=BIGINT},
+                card_previous = #{cardPrevious,jdbcType=VARCHAR},
             </if>
             <if test="direction != null">
                 direction = #{direction,jdbcType=TINYINT},
@@ -168,7 +168,7 @@
                 next_player = #{nextPlayer,jdbcType=BIGINT},
             </if>
             <if test="cardPlay != null">
-                card_play = #{cardPlay,jdbcType=BIGINT},
+                card_play = #{cardPlay,jdbcType=VARCHAR},
             </if>
             <if test="roomNumber != null">
                 room_number = #{roomNumber,jdbcType=VARCHAR},
@@ -191,12 +191,12 @@
             hand3         = #{hand3,jdbcType=VARCHAR},
             hand4         = #{hand4,jdbcType=VARCHAR},
             attack_level  = #{attackLevel,jdbcType=TINYINT},
-            card_previous = #{cardPrevious,jdbcType=BIGINT},
+            card_previous = #{cardPrevious,jdbcType=VARCHAR},
             direction     = #{direction,jdbcType=TINYINT},
             deck          = #{deck,jdbcType=VARCHAR},
             play_player   = #{playPlayer,jdbcType=BIGINT},
             next_player   = #{nextPlayer,jdbcType=BIGINT},
-            card_play     = #{cardPlay,jdbcType=BIGINT},
+            card_play     = #{cardPlay,jdbcType=VARCHAR},
             room_number   = #{roomNumber,jdbcType=VARCHAR},
             status        = #{status,jdbcType=VARCHAR}
         where id = #{id,jdbcType=BIGINT}

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 @Data
-public class BattleStartInvo implements Serializable {
+public class BattleStartInVo implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
