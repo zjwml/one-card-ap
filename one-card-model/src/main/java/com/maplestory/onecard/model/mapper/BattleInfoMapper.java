@@ -8,7 +8,7 @@ import java.util.List;
 /**
 * @author wing
 * @description 针对表【battle_info(对战信息)】的数据库操作Mapper
-* @createDate 2024-08-28 10:41:23
+* @createDate 2024-08-30 10:42:59
 * @Entity com.maplestory.onecard.model.domain.BattleInfo
 */
 @Mapper

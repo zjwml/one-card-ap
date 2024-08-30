@@ -26,54 +26,9 @@ public class BattleInfo implements Serializable {
     private Long turn;
 
     /**
-     * 玩家1
-     */
-    private Long player1;
-
-    /**
-     * 玩家2
-     */
-    private Long player2;
-
-    /**
-     * 玩家3
-     */
-    private Long player3;
-
-    /**
-     * 玩家4
-     */
-    private Long player4;
-
-    /**
-     * 一号手牌
-     */
-    private String hand1;
-
-    /**
-     * 二号手牌
-     */
-    private String hand2;
-
-    /**
-     * 三号手牌
-     */
-    private String hand3;
-
-    /**
-     * 四号手牌
-     */
-    private String hand4;
-
-    /**
      * 攻击点数
      */
     private Integer attackLevel;
-
-    /**
-     * 上一轮的卡
-     */
-    private String cardPrevious;
 
     /**
      * 顺序
@@ -91,14 +46,9 @@ public class BattleInfo implements Serializable {
     private Long playPlayer;
 
     /**
-     * 下一个玩家
-     */
-    private Long nextPlayer;
-
-    /**
      * 当前出的牌
      */
-    private String cardPlay;
+    private String playCard;
 
     /**
      * 房间号
@@ -106,9 +56,19 @@ public class BattleInfo implements Serializable {
     private String roomNumber;
 
     /**
-     * 状态
+     * 00-未开始，01-进行中，02-已结束
      */
     private String status;
+
+    /**
+     * 用户ID集合
+     */
+    private String players;
+
+    /**
+     * 手牌集合
+     */
+    private String hands;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

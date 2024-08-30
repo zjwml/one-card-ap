@@ -20,11 +20,20 @@ public class OneCardConstant {
      */
     public static final String Battle_Status_battling = "01";
     /**
-     * 进行中
+     * 已结束
      */
     public static final String Battle_Status_end = "02";
+    /**
+     * 选颜色
+     */
+    public static final String Battle_Status_changing = "03";
 
     public static final Integer Card_Type_Digit = 0;
 
     public static final Integer Card_Type_Ability = 1;
+
+    /**
+     * 攻击上限
+     */
+    public static final Integer Attack_Max = 12;
 }

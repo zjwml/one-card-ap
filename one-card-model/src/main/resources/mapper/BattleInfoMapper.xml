@@ -7,34 +7,23 @@
     <resultMap id="BaseResultMap" type="com.maplestory.onecard.model.domain.BattleInfo">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="turn" column="turn" jdbcType="BIGINT"/>
-        <result property="player1" column="player1" jdbcType="BIGINT"/>
-        <result property="player2" column="player2" jdbcType="BIGINT"/>
-        <result property="player3" column="player3" jdbcType="BIGINT"/>
-        <result property="player4" column="player4" jdbcType="BIGINT"/>
-        <result property="hand1" column="hand1" jdbcType="VARCHAR"/>
-        <result property="hand2" column="hand2" jdbcType="VARCHAR"/>
-        <result property="hand3" column="hand3" jdbcType="VARCHAR"/>
-        <result property="hand4" column="hand4" jdbcType="VARCHAR"/>
         <result property="attackLevel" column="attack_level" jdbcType="TINYINT"/>
-        <result property="cardPrevious" column="card_previous" jdbcType="VARCHAR"/>
         <result property="direction" column="direction" jdbcType="TINYINT"/>
         <result property="deck" column="deck" jdbcType="VARCHAR"/>
         <result property="playPlayer" column="play_player" jdbcType="BIGINT"/>
-        <result property="nextPlayer" column="next_player" jdbcType="BIGINT"/>
-        <result property="cardPlay" column="card_play" jdbcType="VARCHAR"/>
+        <result property="playCard" column="play_card" jdbcType="VARCHAR"/>
         <result property="roomNumber" column="room_number" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="VARCHAR"/>
+        <result property="players" column="players" jdbcType="VARCHAR"/>
+        <result property="hands" column="hands" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id
-        ,turn,player1,
-        player2,player3,player4,
-        hand1,hand2,hand3,
-        hand4,attack_level,card_previous,
+        ,turn,attack_level,
         direction,deck,play_player,
-        next_player,card_play,room_number,
-        status
+        play_card,room_number,status,
+        players,hands
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -47,7 +36,7 @@
         select
         <include refid="Base_Column_List"/>
         from battle_info
-        where room_number = #{roomNumber,jdbcType=VARCHAR} and status = '00'
+        where room_number = #{roomNumber,jdbcType=VARCHAR}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -58,20 +47,14 @@
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.BattleInfo"
             useGeneratedKeys="true">
         insert into battle_info
-        ( id, turn, player1
-        , player2, player3, player4
-        , hand1, hand2, hand3
-        , hand4, attack_level, card_previous
+        ( id, turn, attack_level
         , direction, deck, play_player
-        , next_player, card_play, room_number
-        , status)
-        values ( #{id,jdbcType=BIGINT}, #{turn,jdbcType=BIGINT}, #{player1,jdbcType=BIGINT}
-               , #{player2,jdbcType=BIGINT}, #{player3,jdbcType=BIGINT}, #{player4,jdbcType=BIGINT}
-               , #{hand1,jdbcType=VARCHAR}, #{hand2,jdbcType=VARCHAR}, #{hand3,jdbcType=VARCHAR}
-               , #{hand4,jdbcType=VARCHAR}, #{attackLevel,jdbcType=TINYINT}, #{cardPrevious,jdbcType=VARCHAR}
+        , play_card, room_number, status
+        , players, hands)
+        values ( #{id,jdbcType=BIGINT}, #{turn,jdbcType=BIGINT}, #{attackLevel,jdbcType=TINYINT}
                , #{direction,jdbcType=TINYINT}, #{deck,jdbcType=VARCHAR}, #{playPlayer,jdbcType=BIGINT}
-               , #{nextPlayer,jdbcType=BIGINT}, #{cardPlay,jdbcType=VARCHAR}, #{roomNumber,jdbcType=VARCHAR}
-               , #{status,jdbcType=VARCHAR})
+               , #{playCard,jdbcType=VARCHAR}, #{roomNumber,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}
+               , #{players,jdbcType=VARCHAR}, #{hands,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id"
             parameterType="com.maplestory.onecard.model.domain.BattleInfo" useGeneratedKeys="true">
@@ -79,44 +62,28 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">id,</if>
             <if test="turn != null">turn,</if>
-            <if test="player1 != null">player1,</if>
-            <if test="player2 != null">player2,</if>
-            <if test="player3 != null">player3,</if>
-            <if test="player4 != null">player4,</if>
-            <if test="hand1 != null">hand1,</if>
-            <if test="hand2 != null">hand2,</if>
-            <if test="hand3 != null">hand3,</if>
-            <if test="hand4 != null">hand4,</if>
             <if test="attackLevel != null">attack_level,</if>
-            <if test="cardPrevious != null">card_previous,</if>
             <if test="direction != null">direction,</if>
             <if test="deck != null">deck,</if>
             <if test="playPlayer != null">play_player,</if>
-            <if test="nextPlayer != null">next_player,</if>
-            <if test="cardPlay != null">card_play,</if>
+            <if test="playCard != null">play_card,</if>
             <if test="roomNumber != null">room_number,</if>
             <if test="status != null">status,</if>
+            <if test="players != null">players,</if>
+            <if test="hands != null">hands,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">#{id,jdbcType=BIGINT},</if>
             <if test="turn != null">#{turn,jdbcType=BIGINT},</if>
-            <if test="player1 != null">#{player1,jdbcType=BIGINT},</if>
-            <if test="player2 != null">#{player2,jdbcType=BIGINT},</if>
-            <if test="player3 != null">#{player3,jdbcType=BIGINT},</if>
-            <if test="player4 != null">#{player4,jdbcType=BIGINT},</if>
-            <if test="hand1 != null">#{hand1,jdbcType=VARCHAR},</if>
-            <if test="hand2 != null">#{hand2,jdbcType=VARCHAR},</if>
-            <if test="hand3 != null">#{hand3,jdbcType=VARCHAR},</if>
-            <if test="hand4 != null">#{hand4,jdbcType=VARCHAR},</if>
             <if test="attackLevel != null">#{attackLevel,jdbcType=TINYINT},</if>
-            <if test="cardPrevious != null">#{cardPrevious,jdbcType=VARCHAR},</if>
             <if test="direction != null">#{direction,jdbcType=TINYINT},</if>
             <if test="deck != null">#{deck,jdbcType=VARCHAR},</if>
             <if test="playPlayer != null">#{playPlayer,jdbcType=BIGINT},</if>
-            <if test="nextPlayer != null">#{nextPlayer,jdbcType=BIGINT},</if>
-            <if test="cardPlay != null">#{cardPlay,jdbcType=VARCHAR},</if>
+            <if test="playCard != null">#{playCard,jdbcType=VARCHAR},</if>
             <if test="roomNumber != null">#{roomNumber,jdbcType=VARCHAR},</if>
             <if test="status != null">#{status,jdbcType=VARCHAR},</if>
+            <if test="players != null">#{players,jdbcType=VARCHAR},</if>
+            <if test="hands != null">#{hands,jdbcType=VARCHAR},</if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.model.domain.BattleInfo">
@@ -125,35 +92,8 @@
             <if test="turn != null">
                 turn = #{turn,jdbcType=BIGINT},
             </if>
-            <if test="player1 != null">
-                player1 = #{player1,jdbcType=BIGINT},
-            </if>
-            <if test="player2 != null">
-                player2 = #{player2,jdbcType=BIGINT},
-            </if>
-            <if test="player3 != null">
-                player3 = #{player3,jdbcType=BIGINT},
-            </if>
-            <if test="player4 != null">
-                player4 = #{player4,jdbcType=BIGINT},
-            </if>
-            <if test="hand1 != null">
-                hand1 = #{hand1,jdbcType=VARCHAR},
-            </if>
-            <if test="hand2 != null">
-                hand2 = #{hand2,jdbcType=VARCHAR},
-            </if>
-            <if test="hand3 != null">
-                hand3 = #{hand3,jdbcType=VARCHAR},
-            </if>
-            <if test="hand4 != null">
-                hand4 = #{hand4,jdbcType=VARCHAR},
-            </if>
             <if test="attackLevel != null">
                 attack_level = #{attackLevel,jdbcType=TINYINT},
-            </if>
-            <if test="cardPrevious != null">
-                card_previous = #{cardPrevious,jdbcType=VARCHAR},
             </if>
             <if test="direction != null">
                 direction = #{direction,jdbcType=TINYINT},
@@ -164,11 +104,8 @@
             <if test="playPlayer != null">
                 play_player = #{playPlayer,jdbcType=BIGINT},
             </if>
-            <if test="nextPlayer != null">
-                next_player = #{nextPlayer,jdbcType=BIGINT},
-            </if>
-            <if test="cardPlay != null">
-                card_play = #{cardPlay,jdbcType=VARCHAR},
+            <if test="playCard != null">
+                play_card = #{playCard,jdbcType=VARCHAR},
             </if>
             <if test="roomNumber != null">
                 room_number = #{roomNumber,jdbcType=VARCHAR},
@@ -176,29 +113,27 @@
             <if test="status != null">
                 status = #{status,jdbcType=VARCHAR},
             </if>
+            <if test="players != null">
+                players = #{players,jdbcType=VARCHAR},
+            </if>
+            <if test="hands != null">
+                hands = #{hands,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.maplestory.onecard.model.domain.BattleInfo">
         update battle_info
-        set turn          = #{turn,jdbcType=BIGINT},
-            player1       = #{player1,jdbcType=BIGINT},
-            player2       = #{player2,jdbcType=BIGINT},
-            player3       = #{player3,jdbcType=BIGINT},
-            player4       = #{player4,jdbcType=BIGINT},
-            hand1         = #{hand1,jdbcType=VARCHAR},
-            hand2         = #{hand2,jdbcType=VARCHAR},
-            hand3         = #{hand3,jdbcType=VARCHAR},
-            hand4         = #{hand4,jdbcType=VARCHAR},
-            attack_level  = #{attackLevel,jdbcType=TINYINT},
-            card_previous = #{cardPrevious,jdbcType=VARCHAR},
-            direction     = #{direction,jdbcType=TINYINT},
-            deck          = #{deck,jdbcType=VARCHAR},
-            play_player   = #{playPlayer,jdbcType=BIGINT},
-            next_player   = #{nextPlayer,jdbcType=BIGINT},
-            card_play     = #{cardPlay,jdbcType=VARCHAR},
-            room_number   = #{roomNumber,jdbcType=VARCHAR},
-            status        = #{status,jdbcType=VARCHAR}
+        set turn         = #{turn,jdbcType=BIGINT},
+            attack_level = #{attackLevel,jdbcType=TINYINT},
+            direction    = #{direction,jdbcType=TINYINT},
+            deck         = #{deck,jdbcType=VARCHAR},
+            play_player  = #{playPlayer,jdbcType=BIGINT},
+            play_card    = #{playCard,jdbcType=VARCHAR},
+            room_number  = #{roomNumber,jdbcType=VARCHAR},
+            status       = #{status,jdbcType=VARCHAR},
+            players      = #{players,jdbcType=VARCHAR},
+            hands        = #{hands,jdbcType=VARCHAR}
         where id = #{id,jdbcType=BIGINT}
     </update>
 </mapper>

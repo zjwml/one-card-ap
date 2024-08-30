@@ -1,5 +1,6 @@
 package com.maplestory.onecard.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.service.vo.ResponseJson;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class GlobalExceptionHandler {
      * @return 通用返回
      */
     @ExceptionHandler({NullPointerException.class})
-    public ResponseJson<Object> customExceptionHandler(NullPointerException e) {
+    public ResponseJson<Object> nullPointerExceptionHandler(NullPointerException e) {
         log.error("NullPointerException异常：", e);
         return ResponseJson.error("空指针异常");
     }
@@ -52,9 +53,21 @@ public class GlobalExceptionHandler {
      * @return 通用返回
      */
     @ExceptionHandler({SQLException.class})
-    public ResponseJson<Object> customExceptionHandler(SQLException e) {
+    public ResponseJson<Object> sqlExceptionHandler(SQLException e) {
         log.error("数据库异常：", e);
         return ResponseJson.error("数据库异常");
+    }
+
+    /**
+     * 处理JSON序列化异常
+     *
+     * @param e 错误
+     * @return 通用返回
+     */
+    @ExceptionHandler({JsonProcessingException.class})
+    public ResponseJson<Object> jsonProcessingExceptionHandler(JsonProcessingException e) {
+        log.error("JSON序列化异常：", e);
+        return ResponseJson.error("JSON序列化异常");
     }
 
     /**
