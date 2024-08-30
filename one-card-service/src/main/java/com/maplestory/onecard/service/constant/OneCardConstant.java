@@ -36,4 +36,9 @@ public class OneCardConstant {
      * 攻击上限
      */
     public static final Integer Attack_Max = 12;
+
+    /**
+     * 总共就49张牌
+     */
+    public static final Integer Deck_Max = 49;
 }

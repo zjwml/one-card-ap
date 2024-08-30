@@ -64,11 +64,7 @@ public class BattleStartImpl implements BattleStart {
             objectNode.put(player, getCards(deck,6));
         }
 
-        try {
-            battleInfo.setHands(objectMapper.writeValueAsString(objectNode));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        battleInfo.setHands(objectNode.toString());
 
         //取出第一张数字牌
         for (int i = 0; i < deck.size(); i++) {
