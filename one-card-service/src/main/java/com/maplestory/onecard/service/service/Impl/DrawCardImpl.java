@@ -7,6 +7,7 @@ import com.maplestory.onecard.model.domain.UserInfo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.service.service.DrawCard;
 import com.maplestory.onecard.service.util.ListUtils;
+import com.maplestory.onecard.service.vo.BattleInfoSubOutVo;
 import com.maplestory.onecard.service.vo.DrawCardInVo;
 import com.maplestory.onecard.service.vo.DrawCardOutVo;
 import com.maplestory.onecard.service.vo.ResponseJson;
@@ -72,7 +73,8 @@ public class DrawCardImpl extends CommonService implements DrawCard {
 
         battleInfoMapper.updateByPrimaryKey(battleInfo);
         DrawCardOutVo outVo = new DrawCardOutVo();
-        BeanUtils.copyProperties(battleInfo, outVo);
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
         log.info("{}--------房间[{}]结束处理摸牌:-----", log001, inVo.getRoomNumber());
         return ResponseJson.ok(outVo);
     }

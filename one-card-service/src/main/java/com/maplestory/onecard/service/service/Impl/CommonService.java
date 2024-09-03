@@ -89,7 +89,7 @@ public abstract class CommonService {
                 String fieldValue = field.getValue().asText();
                 List<CardInfo> hand = objectMapper.readValue(fieldValue, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
                 if (fieldName.equals(userInfo.getId().toString())) {
-                    hands.put(fieldName, fieldValue);
+                    hands.putPOJO(fieldName,hand);
                 } else {
                     hands.put(fieldName, hand.size());
                 }
