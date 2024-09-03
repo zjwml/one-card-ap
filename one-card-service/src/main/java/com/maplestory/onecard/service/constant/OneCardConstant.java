@@ -38,6 +38,11 @@ public class OneCardConstant {
     public static final Integer Attack_Max = 12;
 
     /**
+     * 手牌上限
+     */
+    public static final Integer Hand_Max = 20;
+
+    /**
      * 总共就49张牌
      */
     public static final Integer Deck_Max = 49;

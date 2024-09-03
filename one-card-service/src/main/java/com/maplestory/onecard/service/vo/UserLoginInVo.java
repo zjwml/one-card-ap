@@ -16,12 +16,6 @@ public class UserLoginInVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 用户名
-     */
-
-    private String userId;
-
-    /**
      * 算了，用户名没有用，只要昵称
      */
     @NotBlank(message = "用户名称不能为空")

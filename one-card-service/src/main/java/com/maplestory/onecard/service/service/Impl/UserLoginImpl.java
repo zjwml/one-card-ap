@@ -22,14 +22,8 @@ import java.util.Objects;
 
 @Service
 @Slf4j
-public class UserLoginImpl implements UserLogin {
+public class UserLoginImpl extends CommonService implements UserLogin {
     String log001 = "UserLoginImpl happened:";
-
-    @Autowired
-    private UserInfoMapper userInfoMapper;
-
-    @Autowired
-    private BattleInfoMapper battleInfoMapper;
 
     @Override
     public ResponseJson<UserLoginOutVo> doService(UserLoginInVo inVo) {
@@ -62,23 +56,20 @@ public class UserLoginImpl implements UserLogin {
 
         } else if (battleInfoList.size() == 1) {
             battleInfo = battleInfoList.get(0);
-            List<String>players = ListUtils.StringToStringList(battleInfo.getPlayers());
+            List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
             //判断情况
-            if (players.size()==4) {
+            if (players.size() == 4) {
                 log.info("{}--------房间已满-----", log001);
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
             }
             if (players.contains(userInfo.getId().toString())) {
                 log.info("{}--------已在桌上-----", log001);
-                UserLoginOutVo outVo = new UserLoginOutVo();
-                outVo.setBattleInfo(BeanUtils.switchNullToEmpty(battleInfo));
-                return ResponseJson.ok(outVo);
+            } else {
+                players.add(userInfo.getId().toString());
+                battleInfo.setPlayers(ListUtils.StringListToString(players));
+
+                int id = battleInfoMapper.updateByPrimaryKeySelective(battleInfo);
             }
-
-            players.add(userInfo.getId().toString());
-            battleInfo.setPlayers(ListUtils.StringListToString(players));
-
-            int id = battleInfoMapper.updateByPrimaryKeySelective(battleInfo);
 
         } else {
             log.error("{}--------房间{}不唯一！-----", log001, inVo.getRoomNumber());
@@ -86,7 +77,8 @@ public class UserLoginImpl implements UserLogin {
         }
 
         UserLoginOutVo outVo = new UserLoginOutVo();
-        outVo.setBattleInfo(BeanUtils.switchNullToEmpty(battleInfo));
+        outVo.setBattleInfoSubOutVo(BeanUtils.switchNullToEmpty(getBattleInfoSubOutVo(battleInfo, userInfo)));
+        outVo.setUserInfo(BeanUtils.switchNullToEmpty(userInfo));
         return ResponseJson.ok(outVo);
     }
 
