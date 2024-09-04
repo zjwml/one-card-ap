@@ -15,4 +15,7 @@ public class BattleStartInVo implements Serializable {
     @NotBlank(message = "房间号不能为空")
     @Pattern(regexp = "^\\d{4}$", message = "房间号只能为4位数字")
     private String roomNumber;
+
+    @NotBlank(message = "用户名称必输")
+    private String userName;
 }

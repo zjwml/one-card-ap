@@ -7,6 +7,7 @@ import com.maplestory.onecard.model.domain.UserInfo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.service.service.PlayCard;
 import com.maplestory.onecard.service.util.ListUtils;
+import com.maplestory.onecard.service.vo.BattleInfoSubOutVo;
 import com.maplestory.onecard.service.vo.PlayCardInVo;
 import com.maplestory.onecard.service.vo.PlayCardOutVo;
 import com.maplestory.onecard.service.vo.ResponseJson;
@@ -63,7 +64,8 @@ public class PlayCardImpl extends CommonService implements PlayCard {
             battleInfo.setPlayPlayer(userInfo.getId());
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BeanUtils.copyProperties(battleInfo, outVo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
         log.info("{}---------房间[{}]，开始处理玩家[{}]出牌", log001, inVo.getRoomNumber(), inVo.getUserName());
@@ -87,7 +89,8 @@ public class PlayCardImpl extends CommonService implements PlayCard {
             battleInfo.setStatus(OneCardConstant.Battle_Status_end);
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BeanUtils.copyProperties(battleInfo, outVo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
         //接下来是战斗继续
@@ -101,7 +104,8 @@ public class PlayCardImpl extends CommonService implements PlayCard {
 
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BeanUtils.copyProperties(battleInfo, outVo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
         //反转
@@ -159,7 +163,8 @@ public class PlayCardImpl extends CommonService implements PlayCard {
 
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BeanUtils.copyProperties(battleInfo, outVo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
         //如果是数字牌
@@ -177,13 +182,15 @@ public class PlayCardImpl extends CommonService implements PlayCard {
 
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BeanUtils.copyProperties(battleInfo, outVo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
 
 
         PlayCardOutVo outVo = new PlayCardOutVo();
-        BeanUtils.copyProperties(battleInfo, outVo);
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
         return ResponseJson.ok(outVo);
     }
 
@@ -202,7 +209,8 @@ public class PlayCardImpl extends CommonService implements PlayCard {
 
         battleInfoMapper.updateByPrimaryKey(battleInfo);
         PlayCardOutVo outVo = new PlayCardOutVo();
-        BeanUtils.copyProperties(battleInfo, outVo);
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
         return ResponseJson.ok(outVo);
     }
 

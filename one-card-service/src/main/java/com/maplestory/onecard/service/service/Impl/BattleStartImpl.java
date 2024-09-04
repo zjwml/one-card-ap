@@ -1,12 +1,10 @@
 package com.maplestory.onecard.service.service.Impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.maplestory.onecard.model.domain.BattleInfo;
 import com.maplestory.onecard.model.domain.CardInfo;
-import com.maplestory.onecard.model.mapper.BattleInfoMapper;
-import com.maplestory.onecard.model.mapper.CardInfoMapper;
+import com.maplestory.onecard.model.domain.UserInfo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.service.service.BattleStart;
 import com.maplestory.onecard.service.util.ListUtils;
@@ -16,11 +14,8 @@ import com.maplestory.onecard.service.vo.BattleStartOutVo;
 import com.maplestory.onecard.service.vo.ResponseJson;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -35,6 +30,11 @@ public class BattleStartImpl extends CommonService implements BattleStart {
     @Override
     public ResponseJson<BattleStartOutVo> doService(BattleStartInVo inVo) {
         log.info("{}----------交易开始--------", log001);
+        UserInfo userInfo = userInfoMapper.selectByUserName(inVo.getUserName());
+        if (null == userInfo) {
+            log.error("{}--------用户不存在:{}-----", log001, inVo.getUserName());
+            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "用户不存在");
+        }
 
         List<BattleInfo> battleInfoList = battleInfoMapper.selectByRoomNumber(inVo.getRoomNumber());
 
@@ -84,6 +84,10 @@ public class BattleStartImpl extends CommonService implements BattleStart {
 
         battleInfoMapper.updateByPrimaryKey(battleInfo);
 
-        return ResponseJson.ok();
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
+
+        BattleStartOutVo outVo = new BattleStartOutVo();
+        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
+        return ResponseJson.ok(outVo);
     }
 }
