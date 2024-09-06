@@ -56,7 +56,7 @@ public class BattleInfo implements Serializable {
     private String roomNumber;
 
     /**
-     * 00-未开始，01-进行中，02-已结束
+     * 00-未开始，01-进行中，02-已结束，03-选颜色
      */
     private String status;
 
@@ -64,11 +64,6 @@ public class BattleInfo implements Serializable {
      * 用户ID集合
      */
     private String players;
-
-    /**
-     * 手牌集合
-     */
-    private String hands;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

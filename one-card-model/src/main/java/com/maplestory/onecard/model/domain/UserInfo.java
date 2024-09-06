@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -28,12 +30,25 @@ public class UserInfo implements Serializable {
     /**
      * 用户名
      */
+    @JsonIgnore
     private String userId;
 
     /**
-     * 状态
+     * 0-正常，1-其他
      */
+    @JsonIgnore
     private String status;
+
+    /**
+     * 所在房间
+     */
+    @JsonIgnore
+    private String roomNumber;
+
+    /**
+     * 辅助字段，手牌
+     */
+    private String hand;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

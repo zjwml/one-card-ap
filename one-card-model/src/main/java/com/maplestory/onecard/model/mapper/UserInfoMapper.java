@@ -2,13 +2,12 @@ package com.maplestory.onecard.model.mapper;
 
 import com.maplestory.onecard.model.domain.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
 
 /**
 * @author wing
 * @description 针对表【user_info(用户信息表)】的数据库操作Mapper
-* @createDate 2024-08-23 16:44:12
-* @Entity com.maplestory.onecard.domain.UserInfo
+* @createDate 2024-09-06 10:32:49
+* @Entity com.maplestory.onecard.model.domain.UserInfo
 */
 @Mapper
 public interface UserInfoMapper {

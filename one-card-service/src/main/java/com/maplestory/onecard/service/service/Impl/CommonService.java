@@ -72,32 +72,39 @@ public abstract class CommonService {
             subOutVo.setPlayCard(playCard);
         }
         if (StringUtils.isNotBlank(battleInfo.getPlayers())) {
-            List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
+            List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
             List<UserInfo> userInfos = new ArrayList<>();
-            for (String player : players) {
-                userInfos.add(userInfoMapper.selectByPrimaryKey(Long.valueOf(player)));
+            for (UserInfo record : players) {
+                if (!record.getId().equals(userInfo.getId())) {
+                    if (StringUtils.isNotBlank(record.getHand())) {
+                        String hand = record.getHand();
+                        String[] parts = hand.split("}");
+                        record.setHand(String.valueOf(parts.length - 1));
+                    }
+                }
+                userInfos.add(record);
             }
             subOutVo.setPlayers(userInfos);
         }
-        if (StringUtils.isNotBlank(battleInfo.getHands())) {
-            ObjectNode objectNode = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
-            ObjectNode hands = objectMapper.createObjectNode();
-            Iterator<Map.Entry<String, JsonNode>> iterator = objectNode.fields();
-            while (iterator.hasNext()) {
-                Map.Entry<String, JsonNode> field = iterator.next();
-                String fieldName = field.getKey();
-                String fieldValue = field.getValue().asText();
-                List<CardInfo> hand = objectMapper.readValue(fieldValue, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-                if (fieldName.equals(userInfo.getId().toString())) {
-                    hands.putPOJO(fieldName,hand);
-                } else {
-                    hands.put(fieldName, hand.size());
-                }
-            }
-            subOutVo.setHands(hands);
-        }
-
-
         return subOutVo;
+    }
+
+    @SneakyThrows
+    protected List<CardInfo> getHand(List<UserInfo> players, UserInfo userInfo) {
+        for (UserInfo player : players) {
+            if (player.getId().equals(userInfo.getId())) {
+                return objectMapper.readValue(player.getHand(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    @SneakyThrows
+    protected void setHand(List<UserInfo> players, UserInfo userInfo, List<CardInfo> hand) {
+        for (UserInfo player : players) {
+            if (player.getId().equals(userInfo.getId())) {
+                player.setHand(objectMapper.writeValueAsString(hand));
+            }
+        }
     }
 }

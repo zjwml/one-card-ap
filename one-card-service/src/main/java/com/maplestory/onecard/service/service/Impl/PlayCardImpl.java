@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,22 +65,17 @@ public class PlayCardImpl extends CommonService implements PlayCard {
             battleInfo.setPlayPlayer(userInfo.getId());
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
             outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
         log.info("{}---------房间[{}]，开始处理玩家[{}]出牌", log001, inVo.getRoomNumber(), inVo.getUserName());
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
-        ObjectNode hands = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
-        String str = hands.get(String.valueOf(userInfo.getId())).asText();
-        List<CardInfo> hand = objectMapper.readValue(str, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-        for (int i = 0; i < hand.size(); i++) {
-            CardInfo s = hand.get(i);
-            if (Objects.equals(s.getId(), cardInfo.getId())) {
-                hand.remove(i);
-                break;
-            }
-        }
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
+        List<CardInfo> hand = getHand(players, userInfo);
+        playOneCard(hand, cardInfo);
+        setHand(players, userInfo, hand);
+        battleInfo.setPlayers(objectMapper.writeValueAsString(players));
+
         log.info("{}---------房间[{}]开始判断玩家[{}]是否赢了", log001, inVo.getRoomNumber(), inVo.getUserName());
         //手牌为空就是赢了
         if (hand.isEmpty()) {
@@ -89,7 +85,7 @@ public class PlayCardImpl extends CommonService implements PlayCard {
             battleInfo.setStatus(OneCardConstant.Battle_Status_end);
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
             outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
@@ -104,7 +100,7 @@ public class PlayCardImpl extends CommonService implements PlayCard {
 
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
             outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
@@ -142,30 +138,14 @@ public class PlayCardImpl extends CommonService implements PlayCard {
         }
         //胡克
         if ("hero".equals(cardInfo.getPoint()) && "blue".equals(cardInfo.getColor())) {
-            addTwoToOthers(userInfo, battleInfo);
+            addTwoToOthers(battleInfo, userInfo);
             return nextTurn(userInfo, battleInfo, cardInfo);
         }
         //伊莉娜
         if ("hero".equals(cardInfo.getPoint()) && "green".equals(cardInfo.getColor())) {
             //检查每个人的手牌，删除绿色的，都放进牌堆
             deleteGreenCard(battleInfo);
-
-            battleInfo.setTurn(battleInfo.getTurn() + players.size() + battleInfo.getDirection() % players.size());
-            CardInfo playCard = objectMapper.readValue(battleInfo.getPlayCard(), CardInfo.class);
-            if (!"change".equals(playCard.getPoint())) {
-                addPlayCardIntoDeck(battleInfo);
-            }
-            battleInfo.setPlayCard(objectMapper.writeValueAsString(cardInfo));
-            battleInfo.setPlayPlayer(userInfo.getId());
-            hands = getNewHands(userInfo, battleInfo, cardInfo);
-            battleInfo.setHands(objectMapper.writeValueAsString(hands));
-            battleInfo.setStatus(OneCardConstant.Battle_Status_changing);
-
-            battleInfoMapper.updateByPrimaryKey(battleInfo);
-            PlayCardOutVo outVo = new PlayCardOutVo();
-            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
-            outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
-            return ResponseJson.ok(outVo);
+            return nextTurn(userInfo, battleInfo, cardInfo);
         }
         //如果是数字牌
         if (cardInfo.getPoint().matches("^\\d$")) {
@@ -173,52 +153,23 @@ public class PlayCardImpl extends CommonService implements PlayCard {
         }
         //伊卡尔特
         if ("hero".equals(cardInfo.getPoint()) && "black".equals(cardInfo.getColor())) {
-            battleInfo.setTurn(battleInfo.getTurn() + players.size() + battleInfo.getDirection() % players.size());
-
-            battleInfo.setDeck(battleInfo.getDeck() + "," + cardInfo.getId());
-
-            hands = getNewHands(userInfo, battleInfo, cardInfo);
-            battleInfo.setHands(hands.asText());
+            battleInfo.setTurn((battleInfo.getTurn() + players.size() + battleInfo.getDirection()) % players.size());
 
             battleInfoMapper.updateByPrimaryKey(battleInfo);
             PlayCardOutVo outVo = new PlayCardOutVo();
-            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+            BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
             outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
             return ResponseJson.ok(outVo);
         }
 
 
         PlayCardOutVo outVo = new PlayCardOutVo();
-        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
         outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
         return ResponseJson.ok(outVo);
     }
 
-    @SneakyThrows
-    private ResponseJson<PlayCardOutVo> nextTurn(UserInfo userInfo, BattleInfo battleInfo, CardInfo cardInfo) {
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
-        battleInfo.setTurn((battleInfo.getTurn() + players.size() + battleInfo.getDirection()) % players.size());
-        CardInfo previousCard = objectMapper.readValue(battleInfo.getPlayCard(), CardInfo.class);
-        if (!"change".equals(previousCard.getPoint())) {
-            addPlayCardIntoDeck(battleInfo);
-        }
-        battleInfo.setPlayCard(objectMapper.writeValueAsString(cardInfo));
-        battleInfo.setPlayPlayer(userInfo.getId());
-        ObjectNode hands = getNewHands(userInfo, battleInfo, cardInfo);
-        battleInfo.setHands(hands.asText());
-
-        battleInfoMapper.updateByPrimaryKey(battleInfo);
-        PlayCardOutVo outVo = new PlayCardOutVo();
-        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
-        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
-        return ResponseJson.ok(outVo);
-    }
-
-    @SneakyThrows
-    private ObjectNode getNewHands(UserInfo userInfo, BattleInfo battleInfo, CardInfo cardInfo) {
-        ObjectNode hands = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
-        String str = String.valueOf(hands.get(userInfo.getId().toString()));
-        List<CardInfo> hand = objectMapper.readValue(str, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
+    private void playOneCard(List<CardInfo> hand, CardInfo cardInfo) {
         for (int i = 0; i < hand.size(); i++) {
             CardInfo s = hand.get(i);
             if (Objects.equals(s.getId(), cardInfo.getId())) {
@@ -226,33 +177,47 @@ public class PlayCardImpl extends CommonService implements PlayCard {
                 break;
             }
         }
-        hands.put(userInfo.getId().toString(), objectMapper.writeValueAsString(hand));
-        return hands;
+    }
+
+    @SneakyThrows
+    private ResponseJson<PlayCardOutVo> nextTurn(UserInfo userInfo, BattleInfo battleInfo, CardInfo cardInfo) {
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
+
+        battleInfo.setTurn((battleInfo.getTurn() + players.size() + battleInfo.getDirection()) % players.size());
+        CardInfo previousCard = objectMapper.readValue(battleInfo.getPlayCard(), CardInfo.class);
+        if (!"change".equals(previousCard.getPoint())) {
+            addPlayCardIntoDeck(battleInfo);
+        }
+        battleInfo.setPlayCard(objectMapper.writeValueAsString(cardInfo));
+        battleInfo.setPlayPlayer(userInfo.getId());
+
+        battleInfoMapper.updateByPrimaryKey(battleInfo);
+        PlayCardOutVo outVo = new PlayCardOutVo();
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
+        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
+        return ResponseJson.ok(outVo);
     }
 
     /**
      * 胡克给其他每个人都加2张卡
      *
-     * @param player     出胡克的人
+     * @param userInfo   出胡克的人
      * @param battleInfo 战斗信息
      */
     @SneakyThrows
-    private void addTwoToOthers(UserInfo player, BattleInfo battleInfo) {
+    private void addTwoToOthers(BattleInfo battleInfo, UserInfo userInfo) {
         List<CardInfo> deck = objectMapper.readValue(battleInfo.getDeck(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
-        ObjectNode hands = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
 
-        for (String play : players) {
-            if (Objects.equals(play, player.getId().toString())) {
-                continue;
+        for (UserInfo player : players) {
+            if (player.getId().equals(userInfo.getId())) {
+                List<CardInfo> hand = objectMapper.readValue(player.getHand(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
+                hand.addAll(getCards(deck, 2));
+                player.setHand(objectMapper.writeValueAsString(hand));
             }
-            String str = String.valueOf(hands.get(play));
-            List<CardInfo> hand = objectMapper.readValue(str, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-            hand.addAll(getCards(deck, 2));
-            hands.put(play, objectMapper.writeValueAsString(hand));
         }
-        battleInfo.setHands(objectMapper.writeValueAsString(hands));
         battleInfo.setDeck(objectMapper.writeValueAsString(deck));
+        battleInfo.setPlayers(objectMapper.writeValueAsString(players));
     }
 
     /**
@@ -263,24 +228,22 @@ public class PlayCardImpl extends CommonService implements PlayCard {
     @SneakyThrows
     private void deleteGreenCard(BattleInfo battleInfo) {
         List<CardInfo> deck = objectMapper.readValue(battleInfo.getDeck(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
-        ObjectNode hands = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
 
-        for (String play : players) {
-            String str = String.valueOf(hands.get(play));
-            List<CardInfo> hand = objectMapper.readValue(str, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
+        for (UserInfo player : players) {
+            List<CardInfo> hand = objectMapper.readValue(player.getHand(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
             for (int i = hand.size() - 1; i >= 0; i--) {
-                CardInfo s = hand.get(i);
+                CardInfo greenCard = hand.get(i);
                 //12-24是绿卡
-                if (12 < s.getId() && s.getId() < 24) {
-                    deck.add(s);
+                if (12 < greenCard.getId() && greenCard.getId() < 24) {
+                    deck.add(greenCard);
                     hand.remove(i);
                 }
             }
-            hands.put(play, objectMapper.writeValueAsString(hand));
+            player.setHand(objectMapper.writeValueAsString(hand));
         }
         battleInfo.setDeck(objectMapper.writeValueAsString(deck));
-        battleInfo.setHands(objectMapper.writeValueAsString(hands));
+        battleInfo.setPlayers(objectMapper.writeValueAsString(players));
     }
 
     /**
@@ -294,7 +257,6 @@ public class PlayCardImpl extends CommonService implements PlayCard {
         List<CardInfo> deck = objectMapper.readValue(battleInfo.getDeck(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
         CardInfo playCard = objectMapper.readValue(battleInfo.getPlayCard(), CardInfo.class);
         deck.add(playCard);
-        sortByColorThenPoint(deck);
         battleInfo.setDeck(objectMapper.writeValueAsString(deck));
     }
 
@@ -302,39 +264,53 @@ public class PlayCardImpl extends CommonService implements PlayCard {
      * 检查这个牌能不能出
      *
      * @param battleInfo 战斗信息
-     * @param card       卡信息
-     * @param player     用户
+     * @param cardInfo   卡信息
+     * @param userInfo   用户
      * @return Boolean
      */
     @SneakyThrows
-    private boolean isUnavailableCard(BattleInfo battleInfo, CardInfo card, UserInfo player) {
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
-        if (!Objects.equals(players.get(Math.toIntExact(battleInfo.getTurn())), player.getId().toString())) {
+    private boolean isUnavailableCard(BattleInfo battleInfo, CardInfo cardInfo, UserInfo userInfo) {
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
+        boolean exits = false;
+        for (UserInfo player : players) {
+            if (player.getId().equals(userInfo.getId())) {
+                exits = true;
+                break;
+            }
+        }
+        //不在牌桌上，有人攻击！不能出
+        if (!exits) {
+            log.info("{}------房间[{}]没有[{}],", log001, battleInfo.getRoomNumber(), userInfo.getUserName());
             return true;
         }
-        if ("black".equals(card.getColor())) {
+        if (!players.get(battleInfo.getTurn().intValue()).getId().equals(userInfo.getId())) {
+            log.info("{}------房间[{}]此时不该[{}]出牌,", log001, battleInfo.getRoomNumber(), userInfo.getUserName());
+            return true;
+        }
+        if ("black".equals(cardInfo.getColor())) {
             return false;
         }
         CardInfo previousCard = objectMapper.readValue(battleInfo.getPlayCard(), CardInfo.class);
-        if ("hero".equals(previousCard.getPoint()) && !Objects.equals(previousCard.getColor(), card.getColor())) {
+        //出了攻击2可以出攻击3和奥兹
+        if ("attack2".equals(previousCard.getPoint())) {
+            if ("attack3".equals(cardInfo.getPoint())) {
+                return false;
+            }
+            if ("hero".equals(cardInfo.getPoint()) && "red".equals(cardInfo.getColor())) {
+                return false;
+            }
+        }
+        //出了攻击3可以出奥兹
+        if ("attack3".equals(previousCard.getPoint())) {
+            if ("hero".equals(cardInfo.getPoint()) && "red".equals(cardInfo.getColor())) {
+                return false;
+            }
+        }
+        //出了英雄牌就只能出同颜色的
+        if ("hero".equals(previousCard.getPoint()) && !Objects.equals(previousCard.getColor(), cardInfo.getColor())) {
             return true;
         }
-        if ("attack2".equals(previousCard.getPoint())) {
-            if ("attack3".equals(card.getPoint())) {
-                return false;
-            }
-            if ("hero".equals(card.getPoint()) && "red".equals(card.getColor())) {
-                return false;
-            }
-        }
-        if ("attack3".equals(previousCard.getPoint())) {
-            if ("hero".equals(card.getPoint()) && "red".equals(card.getColor())) {
-                return false;
-            }
-        }
 
-        return !Objects.equals(previousCard.getColor(), card.getColor()) && !Objects.equals(previousCard.getPoint(), card.getPoint());
+        return !Objects.equals(previousCard.getColor(), cardInfo.getColor()) && !Objects.equals(previousCard.getPoint(), cardInfo.getPoint());
     }
-
-
 }

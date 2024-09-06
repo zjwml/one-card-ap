@@ -47,7 +47,7 @@ public class BattleStartImpl extends CommonService implements BattleStart {
             return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间异常不唯一，请联系管理员");
         }
         BattleInfo battleInfo = battleInfoList.get(0);
-        List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
         if (players.size() < 2) {
             log.error("{}--------房间{}人数不足2人:-----", log001, inVo.getRoomNumber());
             return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间人数不足2人");
@@ -57,15 +57,10 @@ public class BattleStartImpl extends CommonService implements BattleStart {
         //洗牌
         Collections.shuffle(deck);
         //发牌
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        ObjectNode objectNode = objectMapper.createObjectNode();
-
-        for (String player : players) {
-            objectNode.put(player, objectMapper.writeValueAsString(getCards(deck, 6)));
+        for (UserInfo player : players) {
+            player.setHand(objectMapper.writeValueAsString(getCards(deck, 6)));
         }
-
-        battleInfo.setHands(objectMapper.writeValueAsString(objectNode));
+        battleInfo.setPlayers(objectMapper.writeValueAsString(players));
 
         //取出第一张数字牌
         for (int i = 0; i < deck.size(); i++) {

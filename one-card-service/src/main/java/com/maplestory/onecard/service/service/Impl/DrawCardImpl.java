@@ -47,33 +47,33 @@ public class DrawCardImpl extends CommonService implements DrawCard {
         log.info("{}--------房间[{}]开始处理摸牌:-----", log001, inVo.getRoomNumber());
 
         List<CardInfo> deck = objectMapper.readValue(battleInfo.getDeck(), objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
-        ObjectNode hands = (ObjectNode) objectMapper.readTree(battleInfo.getHands());
-        String str = hands.get(userInfo.getId().toString()).asText();
-        List<CardInfo> hand = objectMapper.readValue(str, objectMapper.getTypeFactory().constructParametricType(List.class, CardInfo.class));
+        List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
+        List<CardInfo> hand = getHand(players, userInfo);
+        if (!players.get(battleInfo.getTurn().intValue()).getId().equals(userInfo.getId())) {
+            log.info("{}------房间[{}]此时不该[{}]出牌,", log001, battleInfo.getRoomNumber(), userInfo.getUserName());
+            return ResponseJson.failure(OneCardConstant.Code_OtherFail,"未轮到出牌");
+        }
 
         hand.addAll(getCards(deck, battleInfo.getAttackLevel() + 1));
+        //如果手牌数超过20，则输了，放回牌堆
         if (hand.size() > OneCardConstant.Hand_Max) {
             deck.addAll(hand);
-            hands.remove(userInfo.getId().toString());
-            List<String> players = ListUtils.StringToStringList(battleInfo.getPlayers());
             for (int i = 0; i < players.size(); i++) {
-                if (players.get(i).equals(userInfo.getId().toString())) {
+                if (players.get(i).getId().equals(userInfo.getId())) {
                     players.remove(i);
                     break;
                 }
             }
-            battleInfo.setPlayers(ListUtils.StringListToString(players));
-        } else {
-            hands.put(userInfo.getId().toString(), objectMapper.writeValueAsString(hand));
         }
+        battleInfo.setPlayers(objectMapper.writeValueAsString(players));
 
-        battleInfo.setHands(objectMapper.writeValueAsString(hands));
+        battleInfo.setTurn((battleInfo.getTurn() + battleInfo.getDirection() + players.size()) % players.size());
         battleInfo.setDeck(objectMapper.writeValueAsString(deck));
         battleInfo.setAttackLevel(0);
 
         battleInfoMapper.updateByPrimaryKey(battleInfo);
         DrawCardOutVo outVo = new DrawCardOutVo();
-        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo,userInfo);
+        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
         outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
         log.info("{}--------房间[{}]结束处理摸牌:-----", log001, inVo.getRoomNumber());
         return ResponseJson.ok(outVo);
