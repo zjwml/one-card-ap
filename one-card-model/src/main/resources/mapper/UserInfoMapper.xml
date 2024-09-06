@@ -11,11 +11,13 @@
             <result property="status" column="status" jdbcType="VARCHAR"/>
             <result property="roomNumber" column="room_number" jdbcType="VARCHAR"/>
             <result property="hand" column="hand" jdbcType="VARCHAR"/>
+            <result property="ppp" column="ppp" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,user_name,user_id,
-        status,room_number,hand
+        status,room_number,hand,
+        ppp
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -39,10 +41,10 @@
         insert into user_info
         ( id,user_name,user_id
         ,status,room_number,hand
-        )
+        ,ppp)
         values (#{id,jdbcType=BIGINT},#{userName,jdbcType=VARCHAR},#{userId,jdbcType=VARCHAR}
         ,#{status,jdbcType=VARCHAR},#{roomNumber,jdbcType=VARCHAR},#{hand,jdbcType=VARCHAR}
-        )
+        ,#{ppp,jdbcType=VARCHAR})
     </insert>
     <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.maplestory.onecard.model.domain.UserInfo" useGeneratedKeys="true">
         insert into user_info
@@ -53,6 +55,7 @@
                 <if test="status != null">status,</if>
                 <if test="roomNumber != null">room_number,</if>
                 <if test="hand != null">hand,</if>
+                <if test="ppp != null">ppp,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
                 <if test="id != null">#{id,jdbcType=BIGINT},</if>
@@ -61,6 +64,7 @@
                 <if test="status != null">#{status,jdbcType=VARCHAR},</if>
                 <if test="roomNumber != null">#{roomNumber,jdbcType=VARCHAR},</if>
                 <if test="hand != null">#{hand,jdbcType=VARCHAR},</if>
+                <if test="ppp != null">#{ppp,jdbcType=VARCHAR},</if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.maplestory.onecard.model.domain.UserInfo">
@@ -81,6 +85,9 @@
                 <if test="hand != null">
                     hand = #{hand,jdbcType=VARCHAR},
                 </if>
+                <if test="ppp != null">
+                    ppp = #{ppp,jdbcType=VARCHAR},
+                </if>
         </set>
         where   id = #{id,jdbcType=BIGINT} 
     </update>
@@ -91,7 +98,8 @@
             user_id =  #{userId,jdbcType=VARCHAR},
             status =  #{status,jdbcType=VARCHAR},
             room_number =  #{roomNumber,jdbcType=VARCHAR},
-            hand =  #{hand,jdbcType=VARCHAR}
+            hand =  #{hand,jdbcType=VARCHAR},
+            ppp =  #{ppp,jdbcType=VARCHAR}
         where   id = #{id,jdbcType=BIGINT} 
     </update>
 </mapper>

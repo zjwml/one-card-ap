@@ -42,9 +42,8 @@ public class BattleQueryImpl extends CommonService implements BattleQuery {
             return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间异常不唯一，请联系管理员");
         }
         BattleInfo battleInfo = battleInfoList.get(0);
-        BattleInfoSubOutVo battleInfoSubOutVo = getBattleInfoSubOutVo(battleInfo, userInfo);
         BattleQueryOutVo outVo = new BattleQueryOutVo();
-        outVo.setBattleInfoSubOutVo(battleInfoSubOutVo);
+        outVo.setBattleInfoSubOutVo(getBattleInfoSubOutVo(battleInfo, userInfo));
         return ResponseJson.ok(outVo);
     }
 }

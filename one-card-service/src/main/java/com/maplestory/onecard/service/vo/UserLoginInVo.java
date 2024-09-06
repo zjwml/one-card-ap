@@ -22,6 +22,12 @@ public class UserLoginInVo implements Serializable {
     private String userName;
 
     /**
+     * 密码
+     */
+    @NotBlank(message = "密码不能为空")
+    private String ppp;
+
+    /**
      * 房间号
      */
     @NotBlank(message = "房间号不能为空")

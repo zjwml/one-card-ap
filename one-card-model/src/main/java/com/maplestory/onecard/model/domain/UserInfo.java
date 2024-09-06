@@ -50,6 +50,12 @@ public class UserInfo implements Serializable {
      */
     private String hand;
 
+    /**
+     * 
+     */
+    @JsonIgnore
+    private String ppp;
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

@@ -32,18 +32,24 @@ public class UserLoginImpl extends CommonService implements UserLogin {
     public ResponseJson<UserLoginOutVo> doService(UserLoginInVo inVo) {
         log.info("{}----------交易开始--------", log001);
 
-        UserInfo userInfo = userInfoMapper.selectByUserName(inVo.getUserName());
+        String userName = inVo.getUserName().trim();
+        UserInfo userInfo = userInfoMapper.selectByUserName(userName);
         if (null == userInfo) {
             log.info("{}-------新人！插入------", log);
             try {
                 userInfo = new UserInfo();
                 userInfo.setUserName(inVo.getUserName());
                 userInfo.setStatus(OneCardConstant.User_Status_Available);
+                userInfo.setPpp(inVo.getPpp());
                 userInfoMapper.insertSelective(userInfo);
             } catch (Exception e) {
                 log.error("{}--------插入失败:{}-----", log001, e);
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "查询用户失败");
             }
+        }
+        if(!inVo.getPpp().equals(userInfo.getPpp())){
+            log.error("{}--------密码错误-----", log001);
+            return ResponseJson.failure(OneCardConstant.Code_OtherFail, "密码错误");
         }
 
         List<BattleInfo> battleInfoList = battleInfoMapper.selectByRoomNumber(inVo.getRoomNumber());
@@ -61,6 +67,9 @@ public class UserLoginImpl extends CommonService implements UserLogin {
 
         } else if (battleInfoList.size() == 1) {
             battleInfo = battleInfoList.get(0);
+            if(!OneCardConstant.Battle_Status_waiting.equals(battleInfo.getStatus())){
+                return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已开始游戏");
+            }
             List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
             //判断情况
             if (players.size() == 4) {
@@ -86,7 +95,7 @@ public class UserLoginImpl extends CommonService implements UserLogin {
         }
 
         UserLoginOutVo outVo = new UserLoginOutVo();
-        outVo.setBattleInfoSubOutVo(BeanUtils.switchNullToEmpty(getBattleInfoSubOutVo(battleInfo, userInfo)));
+        outVo.setBattleInfoSubOutVo(getBattleInfoSubOutVo(battleInfo, userInfo));
         outVo.setUserInfo(BeanUtils.switchNullToEmpty(userInfo));
         return ResponseJson.ok(outVo);
     }
