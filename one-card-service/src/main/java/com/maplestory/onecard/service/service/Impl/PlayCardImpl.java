@@ -271,15 +271,9 @@ public class PlayCardImpl extends CommonService implements PlayCard {
     @SneakyThrows
     private boolean isUnavailableCard(BattleInfo battleInfo, CardInfo cardInfo, UserInfo userInfo) {
         List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
-        boolean exits = false;
-        for (UserInfo player : players) {
-            if (player.getId().equals(userInfo.getId())) {
-                exits = true;
-                break;
-            }
-        }
+        int pos = getPos(players, userInfo);
         //不在牌桌上，有人攻击！不能出
-        if (!exits) {
+        if (pos == -1) {
             log.info("{}------房间[{}]没有[{}],", log001, battleInfo.getRoomNumber(), userInfo.getUserName());
             return true;
         }

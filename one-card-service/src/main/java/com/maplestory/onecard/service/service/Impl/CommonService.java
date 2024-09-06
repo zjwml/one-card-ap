@@ -107,4 +107,17 @@ public abstract class CommonService {
             }
         }
     }
+
+    @SneakyThrows
+    protected int getPos(List<UserInfo> players, UserInfo userInfo) {
+        int pos = -1;
+        for (int i = 0; i < players.size(); i++) {
+            UserInfo player = players.get(i);
+            if (player.getId().equals(userInfo.getId())) {
+                pos = i;
+                break;
+            }
+        }
+        return pos;
+    }
 }

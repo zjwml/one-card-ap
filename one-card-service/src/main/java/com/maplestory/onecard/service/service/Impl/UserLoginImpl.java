@@ -1,26 +1,19 @@
 package com.maplestory.onecard.service.service.Impl;
 
 import com.maplestory.onecard.model.domain.BattleInfo;
-import com.maplestory.onecard.model.domain.CardInfo;
-import com.maplestory.onecard.model.mapper.BattleInfoMapper;
 import com.maplestory.onecard.service.util.BeanUtils;
-import com.maplestory.onecard.service.util.ListUtils;
 import com.maplestory.onecard.service.vo.UserLoginInVo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
 import com.maplestory.onecard.model.domain.UserInfo;
-import com.maplestory.onecard.model.mapper.UserInfoMapper;
 import com.maplestory.onecard.service.service.UserLogin;
 import com.maplestory.onecard.service.vo.ResponseJson;
 import com.maplestory.onecard.service.vo.UserLoginOutVo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -47,48 +40,41 @@ public class UserLoginImpl extends CommonService implements UserLogin {
                 return ResponseJson.failure(OneCardConstant.Code_OtherFail, "查询用户失败");
             }
         }
-        if(!inVo.getPpp().equals(userInfo.getPpp())){
+        if (!inVo.getPpp().equals(userInfo.getPpp())) {
             log.error("{}--------密码错误-----", log001);
             return ResponseJson.failure(OneCardConstant.Code_OtherFail, "密码错误");
         }
 
         List<BattleInfo> battleInfoList = battleInfoMapper.selectByRoomNumber(inVo.getRoomNumber());
         //开始插入房间
-        BattleInfo battleInfo = new BattleInfo();
+        BattleInfo battleInfo;
         if (battleInfoList.size() == 0) {
             //如果是新房间，则是房主
             battleInfo = new BattleInfo();
-            List<UserInfo>list = new ArrayList<>();
+            List<UserInfo> list = new ArrayList<>();
             list.add(userInfo);
             battleInfo.setPlayers(objectMapper.writeValueAsString(list));
             battleInfo.setRoomNumber(inVo.getRoomNumber());
 
-            int id = battleInfoMapper.insertSelective(battleInfo);
+            battleInfoMapper.insertSelective(battleInfo);
 
         } else if (battleInfoList.size() == 1) {
             battleInfo = battleInfoList.get(0);
-            if(!OneCardConstant.Battle_Status_waiting.equals(battleInfo.getStatus())){
-                return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已开始游戏");
-            }
             List<UserInfo> players = objectMapper.readValue(battleInfo.getPlayers(), objectMapper.getTypeFactory().constructParametricType(List.class, UserInfo.class));
-            //判断情况
-            if (players.size() == 4) {
-                log.info("{}--------房间已满-----", log001);
-                return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
-            }
-            boolean exists = false;
-            for (UserInfo player : players) {
-                if (player.getId().equals(userInfo.getId())){
-                    log.info("{}--------已在桌上-----", log001);
-                    exists = true;
+            int pos = getPos(players, userInfo);
+            if (pos == -1) {
+                if (!OneCardConstant.Battle_Status_waiting.equals(battleInfo.getStatus())) {
+                    return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已开始游戏");
                 }
-            }
-            if(!exists){
+                //判断情况
+                if (players.size() == 4) {
+                    log.info("{}--------房间已满-----", log001);
+                    return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间已满");
+                }
                 players.add(userInfo);
                 battleInfo.setPlayers(objectMapper.writeValueAsString(players));
                 battleInfoMapper.updateByPrimaryKeySelective(battleInfo);
             }
-
         } else {
             log.error("{}--------房间{}不唯一！-----", log001, inVo.getRoomNumber());
             return ResponseJson.failure(OneCardConstant.Code_OtherFail, "房间冲突！请联系管理员");
