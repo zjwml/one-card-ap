@@ -46,4 +46,15 @@ public class OneCardConstant {
      * 总共就49张牌
      */
     public static final Integer Deck_Max = 49;
+
+    /**
+     * 卡背的图片
+     */
+    public static final Long Card_Back = 53L;
+
+    public static final Long Card_Mihile = 48L;
+
+    public static final Long Card_Icart = 49L;
+
+    public static final Long Card_Oz = 36L;
 }

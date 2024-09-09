@@ -102,4 +102,10 @@
             ppp =  #{ppp,jdbcType=VARCHAR}
         where   id = #{id,jdbcType=BIGINT} 
     </update>
+    <update id="clearRoomNumberByPrimaryKey">
+        update user_info
+        set
+            room_number = null
+        where id = #{id,jdbcType=BIGINT}
+    </update>
 </mapper>

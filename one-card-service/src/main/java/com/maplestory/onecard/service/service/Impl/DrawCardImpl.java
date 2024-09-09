@@ -55,6 +55,7 @@ public class DrawCardImpl extends CommonService implements DrawCard {
         }
 
         hand.addAll(getCards(deck, battleInfo.getAttackLevel() + 1));
+        setHand(players,userInfo,hand);
         //如果手牌数超过20，则输了，放回牌堆
         if (hand.size() > OneCardConstant.Hand_Max) {
             deck.addAll(hand);

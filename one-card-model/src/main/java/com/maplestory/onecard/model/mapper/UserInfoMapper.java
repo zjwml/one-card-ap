@@ -25,4 +25,6 @@ public interface UserInfoMapper {
     int updateByPrimaryKey(UserInfo record);
 
     UserInfo selectByUserName(String userName);
+
+    int clearRoomNumberByPrimaryKey(Long id);
 }

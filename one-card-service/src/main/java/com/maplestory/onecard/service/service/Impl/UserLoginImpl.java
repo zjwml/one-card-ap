@@ -1,6 +1,7 @@
 package com.maplestory.onecard.service.service.Impl;
 
 import com.maplestory.onecard.model.domain.BattleInfo;
+import com.maplestory.onecard.model.domain.CardInfo;
 import com.maplestory.onecard.service.util.BeanUtils;
 import com.maplestory.onecard.service.vo.UserLoginInVo;
 import com.maplestory.onecard.service.constant.OneCardConstant;
@@ -53,6 +54,8 @@ public class UserLoginImpl extends CommonService implements UserLogin {
             battleInfo = new BattleInfo();
             List<UserInfo> list = new ArrayList<>();
             list.add(userInfo);
+            CardInfo cardInfo = cardInfoMapper.selectByPrimaryKey(OneCardConstant.Card_Back);
+            battleInfo.setPlayCard(objectMapper.writeValueAsString(cardInfo));
             battleInfo.setPlayers(objectMapper.writeValueAsString(list));
             battleInfo.setRoomNumber(inVo.getRoomNumber());
 
@@ -74,6 +77,8 @@ public class UserLoginImpl extends CommonService implements UserLogin {
                 players.add(userInfo);
                 battleInfo.setPlayers(objectMapper.writeValueAsString(players));
                 battleInfoMapper.updateByPrimaryKeySelective(battleInfo);
+                userInfo.setRoomNumber(inVo.getRoomNumber());
+                userInfoMapper.updateByPrimaryKeySelective(userInfo);
             }
         } else {
             log.error("{}--------房间{}不唯一！-----", log001, inVo.getRoomNumber());
